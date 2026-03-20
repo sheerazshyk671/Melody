@@ -28,12 +28,18 @@
       background: radial-gradient(circle at 10% 20%, #1e102e, #0a0418);
       color: var(--text-light);
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .site-wrapper {
       max-width: 1400px;
       margin: 0 auto;
       padding: 24px 32px 32px 32px;
+      padding-bottom: 100px; /* Space for mini player */
+      transition: padding-bottom 0.3s ease;
+    }
+    .site-wrapper.mini-hidden {
+      padding-bottom: 24px;
     }
 
     /* Login Overlay */
@@ -541,32 +547,75 @@
     .playlist-tracks { margin-top: 12px; padding-left: 20px; display: none; }
     .playlist-tracks.open { display: block; }
 
+    /* Mini Player - Swipe to Dismiss */
     .mini-player {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(15, 8, 30, 0.95);
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(15, 8, 30, 0.98);
       backdrop-filter: blur(25px);
-      border-top: 1px solid rgba(255,255,255,0.2);
-      padding: 12px 32px;
+      border-radius: 80px;
+      padding: 10px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      transform: translateY(100%);
-      transition: transform 0.4s;
+      transform: translateY(0);
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
       z-index: 1000;
-      flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      cursor: grab;
+      touch-action: pan-y pinch-zoom;
     }
-    .mini-player.visible { transform: translateY(0); }
-    .mini-left { display: flex; align-items: center; gap: 16px; flex: 2; min-width: 200px; }
-    .mini-cover { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; animation: rotateDisc 8s linear infinite; animation-play-state: paused; box-shadow: 0 0 10px #c084fc; }
+    .mini-player.dragging {
+      transition: none;
+      cursor: grabbing;
+    }
+    .mini-player.dismissed {
+      transform: translateY(150px);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .mini-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .mini-cover { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; animation: rotateDisc 8s linear infinite; animation-play-state: paused; box-shadow: 0 0 8px #c084fc; flex-shrink: 0; }
     .rotating { animation-play-state: running; }
     @keyframes rotateDisc { 100% { transform: rotate(360deg); } }
-    .mini-controls { display: flex; gap: 16px; align-items: center; }
-    .control-btn { font-size: 28px; cursor: pointer; background: rgba(255,255,255,0.1); width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
-    .expand-full { cursor: pointer; background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 40px; font-size: 14px; }
+    .mini-info { flex: 1; min-width: 0; }
+    .mini-title { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-artist { font-size: 0.7rem; color: #bfb3e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mini-controls { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+    .control-btn { font-size: 24px; cursor: pointer; background: rgba(255,255,255,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.2s; }
+    .control-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
+    .expand-full { cursor: pointer; background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 40px; font-size: 12px; white-space: nowrap; transition: 0.2s; }
+    .expand-full:hover { background: rgba(255,255,255,0.25); }
+    .drag-handle {
+      width: 40px;
+      height: 4px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 4px;
+      margin: 0 auto 8px;
+      display: none;
+    }
+    /* Drag indicator for mobile */
+    @media (max-width: 768px) {
+      .mini-player {
+        padding: 12px 20px;
+        flex-direction: column;
+        align-items: stretch;
+        border-radius: 28px;
+      }
+      .drag-handle {
+        display: block;
+      }
+      .mini-left {
+        width: 100%;
+      }
+      .mini-controls {
+        justify-content: flex-end;
+      }
+    }
 
     .full-player-overlay {
       position: fixed;
@@ -615,7 +664,6 @@
     @media (max-width: 768px) {
       .site-wrapper { padding: 16px; }
       .full-album { width: 200px; height: 200px; }
-      .mini-player { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
@@ -634,7 +682,7 @@
   </div>
   <div class="dropdown-menu" id="dropdownMenu">
     <div class="dropdown-item" data-action="about"><span>ℹ️</span> About Melody</div>
-    <div class="dropdown-item" data-action="version"><span>📌</span> Version 4.0 — Modern Modals</div>
+    <div class="dropdown-item" data-action="version"><span>📌</span> Version 4.0 — Swipe to Dismiss</div>
     <div class="dropdown-item" data-action="help"><span>🆘</span> Help & Tips</div>
     <div class="dropdown-item" data-action="close"><span>✖️</span> Close Menu</div>
   </div>
@@ -677,12 +725,8 @@
       <h3>📋 Add to Playlist</h3>
       <div class="close-modal" id="closeModalBtn">✕</div>
     </div>
-    <div id="modalSongInfo" class="song-info-modal">
-      <!-- Dynamically populated -->
-    </div>
-    <div class="playlist-list" id="modalPlaylistList">
-      <!-- Dynamically populated -->
-    </div>
+    <div id="modalSongInfo" class="song-info-modal"></div>
+    <div class="playlist-list" id="modalPlaylistList"></div>
     <div class="create-new-playlist">
       <input type="text" id="newPlaylistModalInput" placeholder="New playlist name...">
       <button class="create-btn" id="createPlaylistModalBtn">+ Create New Playlist</button>
@@ -707,6 +751,7 @@
 </div>
 
 <div id="miniPlayer" class="mini-player">
+  <div class="drag-handle"></div>
   <div class="mini-left">
     <img id="miniCover" class="mini-cover" alt="cover">
     <div class="mini-info">
@@ -716,7 +761,7 @@
   </div>
   <div class="mini-controls">
     <div id="miniPlayPause" class="control-btn">▶️</div>
-    <div id="expandFull" class="expand-full">🎵 Open Player</div>
+    <div id="expandFull" class="expand-full">🎵 Open</div>
   </div>
 </div>
 
@@ -746,9 +791,7 @@
 <audio id="audioElement"></audio>
 
 <script type="module">
-  // ============================================
-  // REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG KEYS
-  // ============================================
+  // Firebase config - REPLACE WITH YOUR ACTUAL KEYS
  const firebaseConfig = {
   apiKey: "AIzaSyDVnx7QasB26agS0yfuarzWHktK95RXyf4",
   authDomain: "melody-c89f5.firebaseapp.com",
@@ -757,7 +800,6 @@
   messagingSenderId: "774614260551",
   appId: "1:774614260551:web:e9b9c90fdb0cc7c45c0a62"
 };
-  // ============================================
   
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -771,43 +813,178 @@
   let currentUser = null;
   let userData = { favorites: [], playlists: {} };
   let pendingTrackForPlaylist = null;
-  
-  // DOM Elements
-  const appWrapper = document.getElementById('appWrapper');
-  const loginOverlay = document.getElementById('loginOverlay');
-  const userNameDisplay = document.getElementById('userNameDisplay');
-  const userAvatar = document.getElementById('userAvatar');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const googleSignInBtn = document.getElementById('googleSignInBtn');
-  const showSignupBtn = document.getElementById('showSignupBtn');
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
-  const loginError = document.getElementById('loginError');
-  const playlistModal = document.getElementById('playlistModal');
-  const closeModalBtn = document.getElementById('closeModalBtn');
-  const modalSongInfo = document.getElementById('modalSongInfo');
-  const modalPlaylistList = document.getElementById('modalPlaylistList');
-  const newPlaylistModalInput = document.getElementById('newPlaylistModalInput');
-  const createPlaylistModalBtn = document.getElementById('createPlaylistModalBtn');
-  
-  let isSignupMode = false;
-  
-  // Music Player Variables
   let currentQueue = [], currentIndex = 0, isShuffle = false, isRepeat = false, isPlaying = false;
   const audio = document.getElementById('audioElement');
+  const miniPlayer = document.getElementById('miniPlayer');
+  const siteWrapper = document.querySelector('.site-wrapper');
   
+  // Swipe to Dismiss Variables
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+  let miniPlayerDismissed = false;
+  
+  // Helper Functions
   function formatTime(secs) { if(isNaN(secs)) return "0:00"; let m = Math.floor(secs/60), s = Math.floor(secs%60); return `${m}:${s<10?'0'+s:s}`; }
   
+  // Show mini player (reset dismissed state)
+  function showMiniPlayer() {
+    if (currentQueue.length > 0) {
+      miniPlayer.classList.remove('dismissed');
+      miniPlayerDismissed = false;
+      siteWrapper.classList.remove('mini-hidden');
+    }
+  }
+  
+  // Dismiss mini player (swipe down)
+  function dismissMiniPlayer() {
+    miniPlayer.classList.add('dismissed');
+    miniPlayerDismissed = true;
+    siteWrapper.classList.add('mini-hidden');
+  }
+  
+  // Swipe handlers
+  function handleTouchStart(e) {
+    if (miniPlayerDismissed) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    miniPlayer.classList.add('dragging');
+  }
+  
+  function handleTouchMove(e) {
+    if (!isDragging || miniPlayerDismissed) return;
+    currentY = e.touches[0].clientY;
+    const deltaY = currentY - startY;
+    if (deltaY > 0) {
+      // Swipe down - move the mini player down
+      const translateY = Math.min(deltaY, 150);
+      miniPlayer.style.transform = `translateY(${translateY}px)`;
+      miniPlayer.style.opacity = `${1 - (translateY / 150)}`;
+    }
+  }
+  
+  function handleTouchEnd(e) {
+    if (!isDragging || miniPlayerDismissed) {
+      isDragging = false;
+      return;
+    }
+    isDragging = false;
+    miniPlayer.classList.remove('dragging');
+    
+    const deltaY = currentY - startY;
+    if (deltaY > 80) {
+      // Dismiss the mini player
+      dismissMiniPlayer();
+    }
+    // Reset transform
+    miniPlayer.style.transform = '';
+    miniPlayer.style.opacity = '';
+    startY = 0;
+    currentY = 0;
+  }
+  
+  // Add swipe listeners
+  miniPlayer.addEventListener('touchstart', handleTouchStart);
+  miniPlayer.addEventListener('touchmove', handleTouchMove);
+  miniPlayer.addEventListener('touchend', handleTouchEnd);
+  
+  // Show mini player when a song is selected (not dismissed)
+  function showMiniPlayerOnPlay() {
+    if (currentQueue.length > 0 && miniPlayerDismissed) {
+      // If dismissed, don't auto-show - user can tap a new song to bring it back
+      miniPlayer.classList.remove('dismissed');
+      miniPlayerDismissed = false;
+      siteWrapper.classList.remove('mini-hidden');
+    } else if (currentQueue.length > 0 && !miniPlayerDismissed) {
+      miniPlayer.classList.remove('dismissed');
+      siteWrapper.classList.remove('mini-hidden');
+    }
+  }
+  
+  // Player functions
+  function updatePlayerUI(track) {
+    const imgUrl = (track.artworkUrl100 || '').replace('100x100bb','600x600bb') || 'https://via.placeholder.com/600/1a1035/ffffff?text=Melody';
+    document.getElementById('miniCover').src = imgUrl;
+    document.getElementById('fullAlbumImg').src = imgUrl;
+    document.getElementById('miniTitle').innerText = track.trackName || 'Unknown';
+    document.getElementById('miniArtist').innerText = track.artistName || 'Artist';
+    document.getElementById('fullTitle').innerText = track.trackName || 'Unknown';
+    document.getElementById('fullArtist').innerText = track.artistName || 'Artist';
+    if(audio.src !== track.previewUrl) { audio.src = track.previewUrl; audio.load(); }
+    if(isPlaying) audio.play().catch(e=>console.log);
+  }
+  
+  function syncPlayPauseButtons() { 
+    const playing = !audio.paused; 
+    document.getElementById('miniPlayPause').innerHTML = playing ? '⏸️' : '▶️'; 
+    document.getElementById('fullPlayPause').innerHTML = playing ? '⏸️' : '▶️'; 
+    isPlaying = playing;
+    updateRotatingState(playing);
+  }
+  
+  function togglePlay() { 
+    if(!currentQueue.length) return; 
+    if(audio.paused) {
+      audio.play();
+      showMiniPlayerOnPlay();
+    } else {
+      audio.pause();
+    }
+  }
+  
+  function playTrack(index) { 
+    if(!currentQueue[index]) return; 
+    currentIndex = index; 
+    updatePlayerUI(currentQueue[currentIndex]); 
+    audio.play().then(()=>{ 
+      isPlaying = true; 
+      syncPlayPauseButtons(); 
+      updateRotatingState(true);
+      showMiniPlayerOnPlay();
+      highlightActiveTrack(); 
+    }).catch(e=>console.log); 
+  }
+  
+  function nextTrack() { 
+    if(!currentQueue.length) return; 
+    let newIndex = isShuffle ? Math.floor(Math.random()*currentQueue.length) : (currentIndex+1)%currentQueue.length; 
+    playTrack(newIndex); 
+  }
+  
+  function prevTrack() { 
+    if(!currentQueue.length) return; 
+    let newIndex = (currentIndex-1+currentQueue.length)%currentQueue.length; 
+    playTrack(newIndex); 
+  }
+  
+  function updateRotatingState(playing) { 
+    document.querySelectorAll('.mini-cover, .full-album').forEach(d => playing ? d.classList.add('rotating') : d.classList.remove('rotating')); 
+  }
+  
+  function updateProgress() { 
+    if(audio.duration) { 
+      document.getElementById('progressBar').value = (audio.currentTime/audio.duration)*100; 
+      document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
+      document.getElementById('totalDuration').innerText = formatTime(audio.duration); 
+    } 
+  }
+  
+  function seek(e) { if(audio.duration) audio.currentTime = (e.target.value/100) * audio.duration; }
+  function highlightActiveTrack() { document.querySelectorAll('.list-item').forEach(el=>el.classList.remove('active-track')); }
+  function updateHeartUI() { if(currentQueue[currentIndex] && document.getElementById('fullPlayerOverlay').classList.contains('open')) { document.getElementById('fullLikeBtn').innerHTML = isFavorite(currentQueue[currentIndex].trackId) ? '❤️' : '🤍'; } }
+  
+  audio.addEventListener('play', () => { isPlaying=true; syncPlayPauseButtons(); updateRotatingState(true); });
+  audio.addEventListener('pause', () => { isPlaying=false; syncPlayPauseButtons(); updateRotatingState(false); });
+  audio.addEventListener('ended', () => { if(isRepeat) { audio.currentTime=0; audio.play(); } else nextTrack(); });
+  audio.addEventListener('timeupdate', updateProgress);
+  audio.addEventListener('loadedmetadata', () => { document.getElementById('totalDuration').innerText = formatTime(audio.duration); document.getElementById('progressBar').value=0; });
+  
+  // Firebase functions
   async function loadUserDataFromFirebase(uid) {
     const userDocRef = doc(db, "users", uid);
     const docSnap = await getDoc(userDocRef);
-    if (docSnap.exists()) {
-      userData = docSnap.data();
-    } else {
-      userData = { favorites: [], playlists: { "My First Playlist": [] } };
-      await setDoc(userDocRef, userData);
-    }
+    if (docSnap.exists()) { userData = docSnap.data(); } 
+    else { userData = { favorites: [], playlists: { "My First Playlist": [] } }; await setDoc(userDocRef, userData); }
     renderAllSections();
   }
   
@@ -874,13 +1051,11 @@
   }
   
   function isFavorite(trackId) { return userData.favorites.some(f => f.trackId === trackId); }
-  
   function buildTrack(item) { return { trackId: item.trackId, trackName: item.trackName, artistName: item.artistName, artworkUrl100: item.artworkUrl100, previewUrl: item.previewUrl }; }
   
-  // Modern Modal Functions
+  // Modal Functions
   function showPlaylistModal(track) {
     pendingTrackForPlaylist = track;
-    // Update modal with song info
     modalSongInfo.innerHTML = `
       <img src="${(track.artworkUrl100 || '').replace('100x100bb','100x100bb')}" alt="cover">
       <div class="info">
@@ -905,8 +1080,6 @@
         <span class="add-icon">➕</span>
       </div>
     `).join('');
-    
-    // Add click handlers
     modalPlaylistList.querySelectorAll('.playlist-option').forEach(option => {
       option.addEventListener('click', async () => {
         const playlistName = option.dataset.playlist;
@@ -914,7 +1087,6 @@
           await addToPlaylist(playlistName, pendingTrackForPlaylist);
           playlistModal.classList.remove('active');
           pendingTrackForPlaylist = null;
-          // Show success feedback
           const successMsg = document.createElement('div');
           successMsg.textContent = `✅ Added to "${playlistName}"!`;
           successMsg.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#4ade80;padding:12px 24px;border-radius:60px;z-index:5000;font-size:14px;';
@@ -933,24 +1105,30 @@
   
   async function handleCreatePlaylistFromModal() {
     const name = newPlaylistModalInput.value.trim();
-    if (name) {
-      await createPlaylist(name);
-      newPlaylistModalInput.value = '';
-      refreshModalPlaylistList();
-    } else {
-      alert("Please enter a playlist name");
-    }
+    if (name) { await createPlaylist(name); newPlaylistModalInput.value = ''; refreshModalPlaylistList(); } 
+    else { alert("Please enter a playlist name"); }
   }
   
-  // Event listeners for modal
-  closeModalBtn.addEventListener('click', closeModal);
-  playlistModal.addEventListener('click', (e) => {
-    if (e.target === playlistModal) closeModal();
-  });
-  createPlaylistModalBtn.addEventListener('click', handleCreatePlaylistFromModal);
-  newPlaylistModalInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleCreatePlaylistFromModal();
-  });
+  // DOM Elements
+  const appWrapper = document.getElementById('appWrapper');
+  const loginOverlay = document.getElementById('loginOverlay');
+  const userNameDisplay = document.getElementById('userNameDisplay');
+  const userAvatar = document.getElementById('userAvatar');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginBtn = document.getElementById('loginBtn');
+  const googleSignInBtn = document.getElementById('googleSignInBtn');
+  const showSignupBtn = document.getElementById('showSignupBtn');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const loginError = document.getElementById('loginError');
+  const playlistModal = document.getElementById('playlistModal');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  const modalSongInfo = document.getElementById('modalSongInfo');
+  const modalPlaylistList = document.getElementById('modalPlaylistList');
+  const newPlaylistModalInput = document.getElementById('newPlaylistModalInput');
+  const createPlaylistModalBtn = document.getElementById('createPlaylistModalBtn');
+  
+  let isSignupMode = false;
   
   async function loadTrendingAndIndian() {
     const trendingGrid = document.getElementById('trendingGrid');
@@ -964,7 +1142,7 @@
       const resIndian = await fetch('https://itunes.apple.com/search?term=indian+pop&media=music&entity=song&limit=6');
       const dataIndian = await resIndian.json();
       renderIndianList(dataIndian.results.map(buildTrack));
-      if(currentQueue.length === 0 && dataTrend.results.length) { currentQueue = dataTrend.results.slice(0,6).map(buildTrack); playTrack(0); showMiniPlayer(); }
+      if(currentQueue.length === 0 && dataTrend.results.length) { currentQueue = dataTrend.results.slice(0,6).map(buildTrack); playTrack(0); }
     } catch(e) { trendingGrid.innerHTML='<div class="empty-state">⚠️ Network error</div>'; indianReleasesDiv.innerHTML='<div class="empty-state">⚠️ Check connection</div>'; }
   }
   
@@ -1033,37 +1211,7 @@
   
   function renderAllSections() { renderFavoritesPage(); renderPlaylistsPage(); }
   
-  // Player functions (same as before)
-  function updatePlayerUI(track) {
-    const imgUrl = (track.artworkUrl100 || '').replace('100x100bb','600x600bb') || 'https://via.placeholder.com/600/1a1035/ffffff?text=Melody';
-    document.getElementById('miniCover').src = imgUrl;
-    document.getElementById('fullAlbumImg').src = imgUrl;
-    document.getElementById('miniTitle').innerText = track.trackName || 'Unknown';
-    document.getElementById('miniArtist').innerText = track.artistName || 'Artist';
-    document.getElementById('fullTitle').innerText = track.trackName || 'Unknown';
-    document.getElementById('fullArtist').innerText = track.artistName || 'Artist';
-    if(audio.src !== track.previewUrl) { audio.src = track.previewUrl; audio.load(); }
-    if(isPlaying) audio.play().catch(e=>console.log);
-  }
-  
-  function syncPlayPauseButtons() { const playing = !audio.paused; document.getElementById('miniPlayPause').innerHTML = playing ? '⏸️' : '▶️'; document.getElementById('fullPlayPause').innerHTML = playing ? '⏸️' : '▶️'; }
-  function togglePlay() { if(!currentQueue.length) return; audio.paused ? audio.play() : audio.pause(); }
-  function updateProgress() { if(audio.duration) { document.getElementById('progressBar').value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('totalDuration').innerText = formatTime(audio.duration); } }
-  function seek(e) { if(audio.duration) audio.currentTime = (e.target.value/100) * audio.duration; }
-  function playTrack(index) { if(!currentQueue[index]) return; currentIndex = index; updatePlayerUI(currentQueue[currentIndex]); audio.play().then(()=>{ isPlaying=true; syncPlayPauseButtons(); updateRotatingState(true); highlightActiveTrack(); }).catch(e=>console.log); }
-  function nextTrack() { if(!currentQueue.length) return; let newIndex = isShuffle ? Math.floor(Math.random()*currentQueue.length) : (currentIndex+1)%currentQueue.length; playTrack(newIndex); }
-  function prevTrack() { if(!currentQueue.length) return; let newIndex = (currentIndex-1+currentQueue.length)%currentQueue.length; playTrack(newIndex); }
-  function updateRotatingState(playing) { document.querySelectorAll('.mini-cover, .full-album').forEach(d => playing ? d.classList.add('rotating') : d.classList.remove('rotating')); }
-  function highlightActiveTrack() { document.querySelectorAll('.list-item').forEach(el=>el.classList.remove('active-track')); }
-  function showMiniPlayer() { if(currentQueue.length) document.getElementById('miniPlayer').classList.add('visible'); }
-  function updateHeartUI() { if(currentQueue[currentIndex] && document.getElementById('fullPlayerOverlay').classList.contains('open')) { document.getElementById('fullLikeBtn').innerHTML = isFavorite(currentQueue[currentIndex].trackId) ? '❤️' : '🤍'; } }
-  
-  audio.addEventListener('play', () => { isPlaying=true; syncPlayPauseButtons(); updateRotatingState(true); });
-  audio.addEventListener('pause', () => { isPlaying=false; syncPlayPauseButtons(); updateRotatingState(false); });
-  audio.addEventListener('ended', () => { if(isRepeat) { audio.currentTime=0; audio.play(); } else nextTrack(); });
-  audio.addEventListener('timeupdate', updateProgress);
-  audio.addEventListener('loadedmetadata', () => { document.getElementById('totalDuration').innerText = formatTime(audio.duration); document.getElementById('progressBar').value=0; });
-  
+  // Event Listeners
   document.getElementById('miniPlayPause').addEventListener('click', togglePlay);
   document.getElementById('fullPlayPause').addEventListener('click', togglePlay);
   document.getElementById('nextBtn').addEventListener('click', nextTrack);
@@ -1074,6 +1222,12 @@
   document.getElementById('expandFull').addEventListener('click', () => { document.getElementById('fullPlayerOverlay').classList.add('open'); updateHeartUI(); });
   document.getElementById('closeFull').addEventListener('click', () => document.getElementById('fullPlayerOverlay').classList.remove('open'));
   document.getElementById('fullLikeBtn').addEventListener('click', async () => { if(currentQueue[currentIndex]) { await toggleFavorite(currentQueue[currentIndex]); updateHeartUI(); renderFavoritesPage(); } });
+  
+  closeModalBtn.addEventListener('click', closeModal);
+  playlistModal.addEventListener('click', (e) => { if (e.target === playlistModal) closeModal(); });
+  createPlaylistModalBtn.addEventListener('click', handleCreatePlaylistFromModal);
+  newPlaylistModalInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCreatePlaylistFromModal(); });
+  document.getElementById('createPlaylistBtn').addEventListener('click', async () => { const name = document.getElementById('newPlaylistName').value.trim(); if(name) { await createPlaylist(name); document.getElementById('newPlaylistName').value = ''; } else { alert("Please enter a playlist name"); } });
   
   // Search
   let searchTimeout;
@@ -1093,7 +1247,7 @@
           searchResults.innerHTML = tracks.map(t => `<div class="list-item" data-track='${JSON.stringify(t)}'><img class="list-cover" src="${(t.artworkUrl100 || '').replace('100x100bb','200x200bb')}"><div class="list-info"><div class="list-title">${t.trackName}</div><div class="list-artist">${t.artistName}</div></div><div class="list-actions"><div class="action-sm fav-search" data-trackid="${t.trackId}">${isFavorite(t.trackId) ? '❤️' : '🤍'}</div><div class="action-sm playlist-search" data-track='${JSON.stringify(t)}'>📋</div></div></div>`).join('');
           document.querySelectorAll('#searchResults .list-item').forEach(item => {
             const track = JSON.parse(item.dataset.track);
-            item.addEventListener('click', (e) => { if(!e.target.classList.contains('action-sm')) { currentQueue = [track, ...currentQueue.filter(t=>t.trackId!==track.trackId)]; playTrack(0); showMiniPlayer(); } });
+            item.addEventListener('click', (e) => { if(!e.target.classList.contains('action-sm')) { currentQueue = [track, ...currentQueue.filter(t=>t.trackId!==track.trackId)]; playTrack(0); } });
             item.querySelector('.fav-search').addEventListener('click', async (e) => { e.stopPropagation(); await toggleFavorite(track); renderAllSections(); });
             item.querySelector('.playlist-search').addEventListener('click', async (e) => { e.stopPropagation(); showPlaylistModal(track); });
           });
@@ -1102,30 +1256,23 @@
     }, 300);
   });
   
-  // Google Sign-In Handler
+  // Auth
   async function handleGoogleSignIn() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
       loginError.innerText = "";
     } catch(error) {
-      console.error("Google sign-in error:", error);
       loginError.innerText = "Google sign-in failed. Please try again.";
     }
   }
   
-  // Auth
   onAuthStateChanged(auth, async (user) => {
     if(user) {
       currentUser = user;
       const displayName = user.displayName || user.email.split('@')[0];
       userNameDisplay.innerText = displayName;
-      if(user.photoURL) {
-        userAvatar.src = user.photoURL;
-        userAvatar.style.display = 'inline-block';
-      } else {
-        userAvatar.style.display = 'none';
-      }
+      if(user.photoURL) { userAvatar.src = user.photoURL; userAvatar.style.display = 'inline-block'; } 
+      else { userAvatar.style.display = 'none'; }
       await loadUserDataFromFirebase(user.uid);
       appWrapper.style.display = 'block';
       loginOverlay.classList.add('hidden');
@@ -1152,26 +1299,19 @@
       else await signInWithEmailAndPassword(auth, email, password);
       loginError.innerText = "";
     } catch(error) { 
-      if(error.code === 'auth/email-already-in-use') {
-        loginError.innerText = "Email already exists. Please login instead.";
-      } else if(error.code === 'auth/wrong-password') {
-        loginError.innerText = "Wrong password. Please try again.";
-      } else if(error.code === 'auth/user-not-found') {
-        loginError.innerText = "User not found. Please create an account.";
-      } else {
-        loginError.innerText = error.message;
-      }
+      if(error.code === 'auth/email-already-in-use') loginError.innerText = "Email already exists. Please login instead.";
+      else if(error.code === 'auth/wrong-password') loginError.innerText = "Wrong password. Please try again.";
+      else if(error.code === 'auth/user-not-found') loginError.innerText = "User not found. Please create an account.";
+      else loginError.innerText = error.message;
     }
   });
   
   googleSignInBtn.addEventListener('click', handleGoogleSignIn);
-  
   showSignupBtn.addEventListener('click', () => {
     isSignupMode = !isSignupMode;
     loginBtn.innerText = isSignupMode ? "Sign Up" : "Login";
     showSignupBtn.innerText = isSignupMode ? "Back to Login" : "Create Account";
   });
-  
   logoutBtn.addEventListener('click', async () => { await signOut(auth); });
   
   // Navigation
@@ -1192,24 +1332,11 @@
     item.addEventListener('click', () => {
       const action = item.dataset.action;
       if(action === 'about') alert('🎵 Melody - Pure Music Experience\nStream music, create playlists, sync across all devices with Firebase!\n\nSign in with Email or Google!');
-      if(action === 'version') alert('Melody v4.0 — Modern Modal Edition\nBeautiful playlist selector with glassmorphism modal!');
-      if(action === 'help') alert('💡 Tips:\n• Sign in with Email or Google\n• Heart icon = Add to favorites\n• 📋 icon = Opens modern modal to add to playlist\n• Create playlists in Playlists tab\n• Your data syncs across all devices!');
+      if(action === 'version') alert('Melody v4.0 — Swipe to Dismiss\nSwipe down on mini player to hide it!');
+      if(action === 'help') alert('💡 Tips:\n• Sign in with Email or Google\n• Heart icon = Add to favorites\n• 📋 icon = Add to playlist\n• 👆 Swipe down on mini player to dismiss it');
       document.getElementById('dropdownMenu').classList.remove('open');
     });
   });
-  
-  // Create playlist from main page
-  document.getElementById('createPlaylistBtn').addEventListener('click', async () => {
-    const name = document.getElementById('newPlaylistName').value.trim();
-    if(name) {
-      await createPlaylist(name);
-      document.getElementById('newPlaylistName').value = '';
-    } else {
-      alert("Please enter a playlist name");
-    }
-  });
-  
-  setTimeout(() => { if(currentQueue.length) showMiniPlayer(); }, 1000);
 </script>
 </body>
 </html>
