@@ -35,14 +35,13 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 24px 32px 32px 32px;
-      padding-bottom: 100px; /* Space for mini player */
+      padding-bottom: 100px;
       transition: padding-bottom 0.3s ease;
     }
     .site-wrapper.mini-hidden {
       padding-bottom: 24px;
     }
 
-    /* Login Overlay */
     .login-overlay {
       position: fixed;
       top: 0;
@@ -137,7 +136,7 @@
     .toggle-auth { background: transparent; border: none; color: #c084fc; margin-top: 16px; cursor: pointer; font-size: 0.9rem; }
     .error-msg { color: #ff8a8a; font-size: 0.85rem; margin-top: 10px; }
 
-    /* Modern Playlist Modal */
+    /* Playlist Modal */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -221,14 +220,6 @@
     .song-info-modal .info {
       flex: 1;
     }
-    .song-info-modal .title {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .song-info-modal .artist {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-    }
     .playlist-list {
       max-height: 300px;
       overflow-y: auto;
@@ -248,13 +239,6 @@
     .playlist-option:hover {
       background: rgba(255,255,255,0.15);
       transform: translateX(4px);
-    }
-    .playlist-option .name {
-      font-weight: 500;
-    }
-    .playlist-option .add-icon {
-      font-size: 24px;
-      opacity: 0.6;
     }
     .create-new-playlist {
       margin-top: 16px;
@@ -283,11 +267,6 @@
       cursor: pointer;
       width: 100%;
       font-weight: 600;
-    }
-    .empty-playlists {
-      text-align: center;
-      padding: 30px;
-      color: var(--text-dim);
     }
 
     .user-bar {
@@ -407,6 +386,7 @@
       background-clip: text;
       color: transparent;
     }
+    .section-title:first-of-type { margin-top: 0; }
 
     .songs-grid {
       display: grid;
@@ -547,7 +527,7 @@
     .playlist-tracks { margin-top: 12px; padding-left: 20px; display: none; }
     .playlist-tracks.open { display: block; }
 
-    /* Mini Player - Swipe to Dismiss */
+    /* Mini Player */
     .mini-player {
       position: fixed;
       bottom: 20px;
@@ -561,17 +541,11 @@
       align-items: center;
       justify-content: space-between;
       transform: translateY(0);
-      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.2);
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.2), opacity 0.3s;
       z-index: 1000;
       gap: 12px;
       border: 1px solid rgba(255,255,255,0.2);
       box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      cursor: grab;
-      touch-action: pan-y pinch-zoom;
-    }
-    .mini-player.dragging {
-      transition: none;
-      cursor: grabbing;
     }
     .mini-player.dismissed {
       transform: translateY(150px);
@@ -590,31 +564,30 @@
     .control-btn:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
     .expand-full { cursor: pointer; background: rgba(255,255,255,0.1); padding: 6px 16px; border-radius: 40px; font-size: 12px; white-space: nowrap; transition: 0.2s; }
     .expand-full:hover { background: rgba(255,255,255,0.25); }
-    .drag-handle {
-      width: 40px;
-      height: 4px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 4px;
-      margin: 0 auto 8px;
-      display: none;
+    .close-mini {
+      cursor: pointer;
+      background: rgba(255,80,80,0.2);
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 16px;
+      transition: 0.2s;
     }
-    /* Drag indicator for mobile */
+    .close-mini:hover {
+      background: rgba(255,80,80,0.6);
+      transform: scale(1.1);
+    }
+
     @media (max-width: 768px) {
       .mini-player {
-        padding: 12px 20px;
-        flex-direction: column;
-        align-items: stretch;
-        border-radius: 28px;
+        padding: 10px 16px;
+        border-radius: 60px;
       }
-      .drag-handle {
-        display: block;
-      }
-      .mini-left {
-        width: 100%;
-      }
-      .mini-controls {
-        justify-content: flex-end;
-      }
+      .control-btn { width: 36px; height: 36px; font-size: 20px; }
+      .close-mini { width: 28px; height: 28px; font-size: 14px; }
     }
 
     .full-player-overlay {
@@ -682,7 +655,7 @@
   </div>
   <div class="dropdown-menu" id="dropdownMenu">
     <div class="dropdown-item" data-action="about"><span>ℹ️</span> About Melody</div>
-    <div class="dropdown-item" data-action="version"><span>📌</span> Version 4.0 — Swipe to Dismiss</div>
+    <div class="dropdown-item" data-action="version"><span>📌</span> Version 5.0 — Rich Music Library</div>
     <div class="dropdown-item" data-action="help"><span>🆘</span> Help & Tips</div>
     <div class="dropdown-item" data-action="close"><span>✖️</span> Close Menu</div>
   </div>
@@ -693,16 +666,44 @@
     <div class="nav-tab" data-nav="favorites">❤️ Favorites</div>
   </div>
   <div class="main-content">
+    <!-- Home Page - 10 Categories -->
     <div id="homePage" class="page active-page">
       <div class="section-title">🔥 Trending Bollywood Hits</div>
-      <div class="songs-grid" id="trendingGrid"></div>
+      <div class="songs-grid" id="trendingGrid"><div class="loader">✨ Loading...</div></div>
+      
       <div class="section-title">🇮🇳 New Indian Releases</div>
-      <div class="vertical-list" id="indianReleases"></div>
+      <div class="vertical-list" id="indianReleases"><div class="loader">🎧 Loading...</div></div>
+      
+      <div class="section-title">🌍 Global Pop Sensations</div>
+      <div class="songs-grid" id="popGrid"><div class="loader">🌍 Loading...</div></div>
+      
+      <div class="section-title">🎸 Rock Anthems</div>
+      <div class="vertical-list" id="rockList"><div class="loader">🎸 Loading...</div></div>
+      
+      <div class="section-title">🌙 Chill & Lo-Fi Beats</div>
+      <div class="songs-grid" id="lofiGrid"><div class="loader">🌙 Loading...</div></div>
+      
+      <div class="section-title">🎵 Hindi Classics - Evergreen Hits</div>
+      <div class="vertical-list" id="classicsList"><div class="loader">🎵 Loading...</div></div>
+      
+      <div class="section-title">⚡ EDM & Dance Hits</div>
+      <div class="songs-grid" id="edmGrid"><div class="loader">⚡ Loading...</div></div>
+      
+      <div class="section-title">🎸 Indie & Alternative</div>
+      <div class="vertical-list" id="indieList"><div class="loader">🎸 Loading...</div></div>
+      
+      <div class="section-title">🪘 Punjabi Beats</div>
+      <div class="songs-grid" id="punjabiGrid"><div class="loader">🪘 Loading...</div></div>
+      
+      <div class="section-title">🎸 Relaxing Acoustic</div>
+      <div class="vertical-list" id="acousticList"><div class="loader">🎸 Loading...</div></div>
     </div>
+
     <div id="searchPage" class="page">
-      <div class="search-bar"><span>🔍</span><input type="text" id="searchInput" placeholder="Search songs..."></div>
+      <div class="search-bar"><span>🔍</span><input type="text" id="searchInput" placeholder="Search songs, artists..."></div>
       <div id="searchResults"></div>
     </div>
+
     <div id="playlistsPage" class="page">
       <div class="section-title">📋 Your Playlists</div>
       <div class="playlist-creator">
@@ -711,6 +712,7 @@
       </div>
       <div id="playlistsList"></div>
     </div>
+
     <div id="favoritesPage" class="page">
       <div class="section-title">❤️ Liked Songs</div>
       <div id="favoritesList" class="vertical-list"></div>
@@ -718,7 +720,6 @@
   </div>
 </div>
 
-<!-- Modern Playlist Modal -->
 <div id="playlistModal" class="modal-overlay">
   <div class="playlist-modal">
     <div class="modal-header">
@@ -751,7 +752,6 @@
 </div>
 
 <div id="miniPlayer" class="mini-player">
-  <div class="drag-handle"></div>
   <div class="mini-left">
     <img id="miniCover" class="mini-cover" alt="cover">
     <div class="mini-info">
@@ -762,6 +762,7 @@
   <div class="mini-controls">
     <div id="miniPlayPause" class="control-btn">▶️</div>
     <div id="expandFull" class="expand-full">🎵 Open</div>
+    <div id="closeMiniPlayer" class="close-mini" title="Close">✕</div>
   </div>
 </div>
 
@@ -791,15 +792,14 @@
 <audio id="audioElement"></audio>
 
 <script type="module">
-  // Firebase config - REPLACE WITH YOUR ACTUAL KEYS
- const firebaseConfig = {
-  apiKey: "AIzaSyDVnx7QasB26agS0yfuarzWHktK95RXyf4",
-  authDomain: "melody-c89f5.firebaseapp.com",
-  projectId: "melody-c89f5",
-  storageBucket: "melody-c89f5.firebasestorage.app",
-  messagingSenderId: "774614260551",
-  appId: "1:774614260551:web:e9b9c90fdb0cc7c45c0a62"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyDVnx7QasB26agS0yfuarzWHktK95RXyf4",
+    authDomain: "melody-c89f5.firebaseapp.com",
+    projectId: "melody-c89f5",
+    storageBucket: "melody-c89f5.firebasestorage.app",
+    messagingSenderId: "774614260551",
+    appId: "1:774614260551:web:e9b9c90fdb0cc7c45c0a62"
+  };
   
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -817,17 +817,12 @@
   const audio = document.getElementById('audioElement');
   const miniPlayer = document.getElementById('miniPlayer');
   const siteWrapper = document.querySelector('.site-wrapper');
+  const closeMiniBtn = document.getElementById('closeMiniPlayer');
   
-  // Swipe to Dismiss Variables
-  let startY = 0;
-  let currentY = 0;
-  let isDragging = false;
   let miniPlayerDismissed = false;
   
-  // Helper Functions
   function formatTime(secs) { if(isNaN(secs)) return "0:00"; let m = Math.floor(secs/60), s = Math.floor(secs%60); return `${m}:${s<10?'0'+s:s}`; }
   
-  // Show mini player (reset dismissed state)
   function showMiniPlayer() {
     if (currentQueue.length > 0) {
       miniPlayer.classList.remove('dismissed');
@@ -836,72 +831,22 @@
     }
   }
   
-  // Dismiss mini player (swipe down)
   function dismissMiniPlayer() {
     miniPlayer.classList.add('dismissed');
     miniPlayerDismissed = true;
     siteWrapper.classList.add('mini-hidden');
   }
   
-  // Swipe handlers
-  function handleTouchStart(e) {
-    if (miniPlayerDismissed) return;
-    startY = e.touches[0].clientY;
-    isDragging = true;
-    miniPlayer.classList.add('dragging');
-  }
+  closeMiniBtn.addEventListener('click', dismissMiniPlayer);
   
-  function handleTouchMove(e) {
-    if (!isDragging || miniPlayerDismissed) return;
-    currentY = e.touches[0].clientY;
-    const deltaY = currentY - startY;
-    if (deltaY > 0) {
-      // Swipe down - move the mini player down
-      const translateY = Math.min(deltaY, 150);
-      miniPlayer.style.transform = `translateY(${translateY}px)`;
-      miniPlayer.style.opacity = `${1 - (translateY / 150)}`;
-    }
-  }
-  
-  function handleTouchEnd(e) {
-    if (!isDragging || miniPlayerDismissed) {
-      isDragging = false;
-      return;
-    }
-    isDragging = false;
-    miniPlayer.classList.remove('dragging');
-    
-    const deltaY = currentY - startY;
-    if (deltaY > 80) {
-      // Dismiss the mini player
-      dismissMiniPlayer();
-    }
-    // Reset transform
-    miniPlayer.style.transform = '';
-    miniPlayer.style.opacity = '';
-    startY = 0;
-    currentY = 0;
-  }
-  
-  // Add swipe listeners
-  miniPlayer.addEventListener('touchstart', handleTouchStart);
-  miniPlayer.addEventListener('touchmove', handleTouchMove);
-  miniPlayer.addEventListener('touchend', handleTouchEnd);
-  
-  // Show mini player when a song is selected (not dismissed)
   function showMiniPlayerOnPlay() {
     if (currentQueue.length > 0 && miniPlayerDismissed) {
-      // If dismissed, don't auto-show - user can tap a new song to bring it back
-      miniPlayer.classList.remove('dismissed');
-      miniPlayerDismissed = false;
-      siteWrapper.classList.remove('mini-hidden');
+      showMiniPlayer();
     } else if (currentQueue.length > 0 && !miniPlayerDismissed) {
-      miniPlayer.classList.remove('dismissed');
-      siteWrapper.classList.remove('mini-hidden');
+      showMiniPlayer();
     }
   }
   
-  // Player functions
   function updatePlayerUI(track) {
     const imgUrl = (track.artworkUrl100 || '').replace('100x100bb','600x600bb') || 'https://via.placeholder.com/600/1a1035/ffffff?text=Melody';
     document.getElementById('miniCover').src = imgUrl;
@@ -979,7 +924,6 @@
   audio.addEventListener('timeupdate', updateProgress);
   audio.addEventListener('loadedmetadata', () => { document.getElementById('totalDuration').innerText = formatTime(audio.duration); document.getElementById('progressBar').value=0; });
   
-  // Firebase functions
   async function loadUserDataFromFirebase(uid) {
     const userDocRef = doc(db, "users", uid);
     const docSnap = await getDoc(userDocRef);
@@ -1053,7 +997,6 @@
   function isFavorite(trackId) { return userData.favorites.some(f => f.trackId === trackId); }
   function buildTrack(item) { return { trackId: item.trackId, trackName: item.trackName, artistName: item.artistName, artworkUrl100: item.artworkUrl100, previewUrl: item.previewUrl }; }
   
-  // Modal Functions
   function showPlaylistModal(track) {
     pendingTrackForPlaylist = track;
     modalSongInfo.innerHTML = `
@@ -1109,7 +1052,6 @@
     else { alert("Please enter a playlist name"); }
   }
   
-  // DOM Elements
   const appWrapper = document.getElementById('appWrapper');
   const loginOverlay = document.getElementById('loginOverlay');
   const userNameDisplay = document.getElementById('userNameDisplay');
@@ -1130,30 +1072,54 @@
   
   let isSignupMode = false;
   
-  async function loadTrendingAndIndian() {
-    const trendingGrid = document.getElementById('trendingGrid');
-    const indianReleasesDiv = document.getElementById('indianReleases');
-    trendingGrid.innerHTML = '<div class="loader">✨ Loading trending hits...</div>';
-    indianReleasesDiv.innerHTML = '<div class="loader">🎧 Loading fresh releases...</div>';
-    try {
-      const resTrend = await fetch('https://itunes.apple.com/search?term=bollywood&media=music&entity=song&limit=8');
-      const dataTrend = await resTrend.json();
-      renderTrendingGrid(dataTrend.results.map(buildTrack));
-      const resIndian = await fetch('https://itunes.apple.com/search?term=indian+pop&media=music&entity=song&limit=6');
-      const dataIndian = await resIndian.json();
-      renderIndianList(dataIndian.results.map(buildTrack));
-      if(currentQueue.length === 0 && dataTrend.results.length) { currentQueue = dataTrend.results.slice(0,6).map(buildTrack); playTrack(0); }
-    } catch(e) { trendingGrid.innerHTML='<div class="empty-state">⚠️ Network error</div>'; indianReleasesDiv.innerHTML='<div class="empty-state">⚠️ Check connection</div>'; }
+  // Sequential category loading with delay to prevent rate limiting
+  async function loadAllCategoriesSequentially() {
+    const categories = [
+      { id: 'trendingGrid', term: 'bollywood', limit: 8, type: 'grid' },
+      { id: 'indianReleases', term: 'indian pop', limit: 6, type: 'list' },
+      { id: 'popGrid', term: 'pop', limit: 8, type: 'grid' },
+      { id: 'rockList', term: 'rock', limit: 6, type: 'list' },
+      { id: 'lofiGrid', term: 'lofi', limit: 8, type: 'grid' },
+      { id: 'classicsList', term: 'classical indian', limit: 6, type: 'list' },
+      { id: 'edmGrid', term: 'edm', limit: 8, type: 'grid' },
+      { id: 'indieList', term: 'indie', limit: 6, type: 'list' },
+      { id: 'punjabiGrid', term: 'punjabi', limit: 8, type: 'grid' },
+      { id: 'acousticList', term: 'acoustic', limit: 6, type: 'list' }
+    ];
+    
+    for (let i = 0; i < categories.length; i++) {
+      const cat = categories[i];
+      const container = document.getElementById(cat.id);
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(cat.term)}&media=music&entity=song&limit=${cat.limit}`);
+        const data = await res.json();
+        const tracks = data.results.map(buildTrack);
+        
+        if (cat.type === 'grid') {
+          renderGrid(container, tracks);
+        } else {
+          renderList(container, tracks);
+        }
+      } catch (error) {
+        console.error(`Error loading ${cat.term}:`, error);
+        if (container) {
+          container.innerHTML = '<div class="empty-state">⚠️ Failed to load</div>';
+        }
+      }
+    }
   }
   
-  function renderTrendingGrid(tracks) {
-    const container = document.getElementById('trendingGrid');
+  function renderGrid(container, tracks) {
+    if (!container) return;
     container.innerHTML = tracks.map(t => `<div class="glass-card" data-track='${JSON.stringify(t)}'><img class="album-cover" src="${(t.artworkUrl100 || '').replace('100x100bb','600x600bb')}"><div class="song-title-sm">${(t.trackName || '').substring(0,25)}</div><div class="artist-sm">${t.artistName || ''}</div><div class="card-actions"><div class="action-icon fav-icon" data-trackid="${t.trackId}">${isFavorite(t.trackId) ? '❤️' : '🤍'}</div><div class="action-icon playlist-icon" data-track='${JSON.stringify(t)}'>📋</div></div></div>`).join('');
     attachCardEvents(container);
   }
   
-  function renderIndianList(tracks) {
-    const container = document.getElementById('indianReleases');
+  function renderList(container, tracks) {
+    if (!container) return;
     container.innerHTML = tracks.map(t => `<div class="list-item" data-track='${JSON.stringify(t)}'><img class="list-cover" src="${(t.artworkUrl100 || '').replace('100x100bb','200x200bb')}"><div class="list-info"><div class="list-title">${t.trackName || ''}</div><div class="list-artist">${t.artistName || ''}</div></div><div class="list-actions"><div class="action-sm fav-sm" data-trackid="${t.trackId}">${isFavorite(t.trackId) ? '❤️' : '🤍'}</div><div class="action-sm playlist-sm" data-track='${JSON.stringify(t)}'>📋</div></div></div>`).join('');
     attachListEvents(container);
   }
@@ -1195,7 +1161,7 @@
     const container = document.getElementById('playlistsList');
     const playlists = userData.playlists;
     if(Object.keys(playlists).length === 0) { container.innerHTML = '<div class="empty-state">📭 No playlists yet. Create one above!</div>'; return; }
-    container.innerHTML = Object.entries(playlists).map(([name, tracks]) => `<div class="playlist-item"><div class="playlist-header"><span class="playlist-name">📁 ${name}</span><span class="delete-playlist" data-name="${name}">Delete</span></div><div class="playlist-tracks" id="playlist-${name.replace(/\s/g,'')}">${tracks.map(t => `<div class="list-item" style="margin:8px 0;padding:8px;" data-track='${JSON.stringify(t)}'><img class="list-cover" style="width:40px;height:40px;" src="${(t.artworkUrl100||'').replace('100x100bb','100x100bb')}"><div class="list-info"><div>${t.trackName}</div><div class="list-artist">${t.artistName}</div></div><div class="remove-track" data-playlist="${name}" data-trackid="${t.trackId}" style="cursor:pointer;background:rgba(255,80,80,0.3);padding:6px 12px;border-radius:40px;">Remove</div></div>`).join('') || '<div class="empty-state" style="padding:20px;">Empty playlist - add songs using 📋 icon</div>'}</div></div>`).join('');
+    container.innerHTML = Object.entries(playlists).map(([name, tracks]) => `<div class="playlist-item"><div class="playlist-header"><span class="playlist-name">📁 ${name}</span><span class="delete-playlist" data-name="${name}">Delete</span></div><div class="playlist-tracks" id="playlist-${name.replace(/\s/g,'')}">${tracks.map(t => `<div class="list-item" style="margin:8px 0;padding:8px;" data-track='${JSON.stringify(t)}'><img class="list-cover" style="width:40px;height:40px;" src="${(t.artworkUrl100||'').replace('100x100bb','100x100bb')}"><div class="list-info"><div>${t.trackName}</div><div class="list-artist">${t.artistName}</div></div><div class="remove-track" data-playlist="${name}" data-trackid="${t.trackId}" style="cursor:pointer;background:rgba(255,80,80,0.3);padding:6px 12px;border-radius:40px;">Remove</div></div>`).join('') || '<div class="empty-state" style="padding:20px;">Empty playlist</div>'}</div></div>`).join('');
     
     Object.entries(playlists).forEach(([name, tracks]) => {
       const header = container.querySelector(`.playlist-header`);
@@ -1211,7 +1177,6 @@
   
   function renderAllSections() { renderFavoritesPage(); renderPlaylistsPage(); }
   
-  // Event Listeners
   document.getElementById('miniPlayPause').addEventListener('click', togglePlay);
   document.getElementById('fullPlayPause').addEventListener('click', togglePlay);
   document.getElementById('nextBtn').addEventListener('click', nextTrack);
@@ -1229,7 +1194,6 @@
   newPlaylistModalInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleCreatePlaylistFromModal(); });
   document.getElementById('createPlaylistBtn').addEventListener('click', async () => { const name = document.getElementById('newPlaylistName').value.trim(); if(name) { await createPlaylist(name); document.getElementById('newPlaylistName').value = ''; } else { alert("Please enter a playlist name"); } });
   
-  // Search
   let searchTimeout;
   document.getElementById('searchInput').addEventListener('input', () => {
     clearTimeout(searchTimeout);
@@ -1239,24 +1203,27 @@
       if(query.length < 1) { searchResults.innerHTML = '<div class="empty-state">🔎 Type to search songs...</div>'; return; }
       searchResults.innerHTML = '<div class="loader">searching...</div>';
       try {
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`);
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=20`);
         const data = await res.json();
         if(!data.results.length) { searchResults.innerHTML = '<div class="no-results">🎵 No results found.</div>'; }
         else {
           const tracks = data.results.map(buildTrack);
           searchResults.innerHTML = tracks.map(t => `<div class="list-item" data-track='${JSON.stringify(t)}'><img class="list-cover" src="${(t.artworkUrl100 || '').replace('100x100bb','200x200bb')}"><div class="list-info"><div class="list-title">${t.trackName}</div><div class="list-artist">${t.artistName}</div></div><div class="list-actions"><div class="action-sm fav-search" data-trackid="${t.trackId}">${isFavorite(t.trackId) ? '❤️' : '🤍'}</div><div class="action-sm playlist-search" data-track='${JSON.stringify(t)}'>📋</div></div></div>`).join('');
-          document.querySelectorAll('#searchResults .list-item').forEach(item => {
-            const track = JSON.parse(item.dataset.track);
-            item.addEventListener('click', (e) => { if(!e.target.classList.contains('action-sm')) { currentQueue = [track, ...currentQueue.filter(t=>t.trackId!==track.trackId)]; playTrack(0); } });
-            item.querySelector('.fav-search').addEventListener('click', async (e) => { e.stopPropagation(); await toggleFavorite(track); renderAllSections(); });
-            item.querySelector('.playlist-search').addEventListener('click', async (e) => { e.stopPropagation(); showPlaylistModal(track); });
-          });
+          attachSearchEvents();
         }
       } catch(e) { searchResults.innerHTML = '<div class="empty-state">Error loading</div>'; }
     }, 300);
   });
   
-  // Auth
+  function attachSearchEvents() {
+    document.querySelectorAll('#searchResults .list-item').forEach(item => {
+      const track = JSON.parse(item.dataset.track);
+      item.addEventListener('click', (e) => { if(!e.target.classList.contains('action-sm')) { currentQueue = [track, ...currentQueue.filter(t=>t.trackId!==track.trackId)]; playTrack(0); } });
+      item.querySelector('.fav-search').addEventListener('click', async (e) => { e.stopPropagation(); await toggleFavorite(track); renderAllSections(); });
+      item.querySelector('.playlist-search').addEventListener('click', async (e) => { e.stopPropagation(); showPlaylistModal(track); });
+    });
+  }
+  
   async function handleGoogleSignIn() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -1276,7 +1243,7 @@
       await loadUserDataFromFirebase(user.uid);
       appWrapper.style.display = 'block';
       loginOverlay.classList.add('hidden');
-      loadTrendingAndIndian();
+      loadAllCategoriesSequentially();
     } else {
       currentUser = null;
       appWrapper.style.display = 'none';
@@ -1314,7 +1281,6 @@
   });
   logoutBtn.addEventListener('click', async () => { await signOut(auth); });
   
-  // Navigation
   document.querySelectorAll('.nav-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
@@ -1326,14 +1292,13 @@
     });
   });
   
-  // Menu
   document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('dropdownMenu').classList.toggle('open'));
   document.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', () => {
       const action = item.dataset.action;
-      if(action === 'about') alert('🎵 Melody - Pure Music Experience\nStream music, create playlists, sync across all devices with Firebase!\n\nSign in with Email or Google!');
-      if(action === 'version') alert('Melody v4.0 — Swipe to Dismiss\nSwipe down on mini player to hide it!');
-      if(action === 'help') alert('💡 Tips:\n• Sign in with Email or Google\n• Heart icon = Add to favorites\n• 📋 icon = Add to playlist\n• 👆 Swipe down on mini player to dismiss it');
+      if(action === 'about') alert('🎵 Melody - Pure Music Experience\n10 Music Categories with 70+ curated songs!\nSign in with Email or Google to save your favorites.');
+      if(action === 'version') alert('Melody v5.0 — Rich Music Library\n10 Categories:\n• Trending Bollywood\n• Indian Pop\n• Global Pop\n• Rock Anthems\n• Lo-Fi Beats\n• Hindi Classics\n• EDM Dance\n• Indie Alt\n• Punjabi Beats\n• Relaxing Acoustic');
+      if(action === 'help') alert('💡 Tips:\n• Browse 10 music categories\n• Click ✕ to dismiss mini player\n• Heart icon = Add to favorites\n• 📋 icon = Add to playlist');
       document.getElementById('dropdownMenu').classList.remove('open');
     });
   });
